@@ -1,0 +1,26 @@
+1. Generation of Private key
+	openssl genrsa -des3 -out server.key 2048
+
+2.Generate CSR
+	openssl req -new -key server.key -sha256 -out server.csr
+
+3.Generate Self signed cert
+	openssl x509 -req -days 365 -in server.csr -signkey server.key -sha256 -out self-signed-cert-server.crt
+now add the cert to the trusted store
+
+4.Prepare a .pfx
+	openssl pkcs12 -export -out code-signing-cert.pfx -inkey server.key -in self-signed-cert-server.crt
+
+5.Signing using signtool
+	signtool sign /f C:\Program Files\OpenSSL-Win64\Signtool\OpenSSL-Keys\code-signing-cert.pfx /p bmsit91011 /fd sha256 /tr http://timestamp.digicert.com /td sha256 hello.exe
+
+6.Verification
+	signtool verify /pa /v hello.exe
+
+7.Secure Software Distribution
+	python server.py
+	
+	Get token: https://localhost:5000/get-token
+	
+	https://localhost:5000/download/signed?token=PASTE_TOKEN_HERE
+	
